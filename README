@@ -1,6 +1,6 @@
 Contains random snippets of code from an ongoing MMO project. I posted some convenient animations scripts, my extensions class, some random typical game scripts such as controls / spawning, and some networking code.
 
-Let me take this opportunity to brag about the architecture of the networking:
+Notable features from the networking:
 
 Client/Server derive from NetworkIO. This derives from NetworkInterface. If you want to switch Networking Interface, from, lets say, WebRTC to a direct C# Socket, you would derive from NetworkInterface and override SendNow(byte[] data) and HandleData(int conn, byte[] data) among other generic functions and use these to define how it gets sent over the network, then make NetworkIO derive from that NetworkInterface instead. Boom.
 
