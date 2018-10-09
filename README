@@ -1,0 +1,31 @@
+Contains random snippets of code from an ongoing MMO project. I posted some convenient animations scripts, my extensions class, some random typical game scripts such as controls / spawning, and some networking code.
+
+Let me take this opportunity to brag about the architecture of the networking:
+
+Client/Server derive from NetworkIO. This derives from NetworkInterface. If you want to switch Networking Interface, from, lets say, WebRTC to a direct C# Socket, you would derive from NetworkInterface and override SendNow(byte[] data) and HandleData(int conn, byte[] data) among other generic functions and use these to define how it gets sent over the network, then make NetworkIO derive from that NetworkInterface instead. Boom.
+
+NetworkIO contains instance references such as a list of known players and functions common to both Client and Server such as delaying packets for debug and serializing.
+
+Spells are a joy to code in. In order to create a mix-and-match system to make spell coding 10x faster, each cast creates an instance of class SpellHit which can override every step of the casting process and call multiple **static** functions which accept a SpellHit as a parameter with actions like damage/healing/DoT as an output. I created other static functions that will gather targets and call the main function of the Spell on them for things like AoE, cone cast, multi-hit, and so on. To create a new spell, simply create a new class that inherits from Spell and setup the constructor with the name and description. 
+
+On startup, all spells derive from Spell are added to a list, and this generates their ID. You can then call on client Spell.GetSpell(id).TryStartCast(). Boom.
+
+Since calling an empty loop or empty function is effectively free, SpellHits can add themselves to players which modify the behaviour of other SpellHits in different intervals of flat changes, percentage changes, defensive and offensive, so you don't have to code every single individual interaction between spells. These functions are called when a spell is cast to build the resulting output on the SpellHit incrementally, which stores power, castTime, duration, and so on.
+
+This comes with the tradeoff of having to be very careful about garbage colelction as SpellHit is a class. I made this tradeoff because this is 100x easier than having to code and maintain interactions between 1-2000 spells.
+
+Example:
+
+Create new spell, derive from spell, put name and description in the constructor, and make it a fire type. Override CalcFlatOffensive to give .5f cast time, 12f duration, 30f range, 1f interval. Override OnTryHit and call Ability.TryAddEffect(spellHit) to add a DoT with these parameters when it is cast.
+
+Create another spell, override CalcValidTarget(Player caster, Player target) to make it only target ourselves. Override OnTryHit to make it add itself as a status effect on the player when it is cast like before. Override CalcCastOffensive(SpellHit newCast, SpellHit self) and make it have a status effect calculation that changes newCast's cast time to 0 if it is a fire effect, then it removes itself from the player.
+
+Now, when you call the second spell, your next fire ability will be instant cast. If you cast the first spell, it will automatically call all of the status effects on the player to give them a chance to mod the spell, and our second spell will then set the cast time to 0 and remove itself.
+
+We can also give it a number of charges and store them internally, lets say 3.
+
+We can also make the ability hit multiple targets, add a charge of something else, make a detonation if it was a "cleanse" like unstable affliction in WoW, change the hit/dodge chance, make spawn aesthetics if the player has something, and it's all in its own neat singleton, and has truly unlimited potential, because even the talent system is designed to hook into this and call the functions automatically because they also override the broader SpellMod class from which Spell derives.
+
+Conversely, we can override the defensive functions to do all these things but instead subtract from the cast time, power, crit chance, and so on when an enemy attacks the player.
+
+It is truly a joy to code in.
