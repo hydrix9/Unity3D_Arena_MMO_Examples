@@ -4,12 +4,12 @@ using UnityEngine;
 
 
 /// <summary>
-/// creates a random monster spawner within a collider. MonsterSpawner then snaps to grid
+/// Editor tool that creates a random monster spawner within a collider. MonsterSpawner then snaps to grid
 /// </summary>
 public class SpawnGenerator : MonoBehaviour {
 
     Collider c;
-    public int numSpawns = 5;
+    public int numSpawns = 5; //number of spawns to generate
 
 	// Use this for initialization
 	void Start () {
@@ -22,6 +22,10 @@ public class SpawnGenerator : MonoBehaviour {
 
     public bool trySpawn;
 
+
+    /// <summary>
+    /// when you click the bool, it does the function TrySpawn from the editor. 
+    /// </summary>
     void OnDrawGizmos()
     {
         if (!trySpawn) return;
@@ -43,6 +47,7 @@ public class SpawnGenerator : MonoBehaviour {
         if (c == null)
             return;
 
+        //temp
         Vector3 newPos = oob;
         GameObject newSpawn;
 
@@ -54,7 +59,7 @@ public class SpawnGenerator : MonoBehaviour {
                 newPos = new Vector3(Random.Range(c.bounds.min.x, c.bounds.max.x), Random.Range(c.bounds.min.y, c.bounds.max.y), Random.Range(c.bounds.min.z, c.bounds.max.z));
             }
 
-            newSpawn = GameObject.Instantiate<GameObject>(monsterSpawners.Random(), newPos, Quaternion.identity, transform);
+            newSpawn = GameObject.Instantiate<GameObject>(monsterSpawners.Random(), newPos, Quaternion.identity, transform); //spawn a random monster spawner from our list of possible
             newSpawn.GetComponent<MonsterSpawner>().SnapToValid(); //snap to valid position on grid
 
         }
