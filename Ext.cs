@@ -41,7 +41,7 @@ public class Ext : MonoBehaviour {
 
     // Use this for initialization
     void Start() {
-        QualitySettings.vSyncCount = 0;
+        QualitySettings.vSyncCount = 0; //always turn off vertical sync... Unity has a problem of having extremely high overhead with vSync
     }
 
 
